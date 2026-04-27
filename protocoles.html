@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Protocoles</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0d14;--bg2:#13131f;--card:#181825;--card2:#1f1f32;
+  --purple:#7c5af3;--purple-light:#9b7ff7;--purple-dim:rgba(124,90,243,0.15);--purple-glow:rgba(124,90,243,0.3);
+  --orange:#f97316;--green:#22d3a0;--red:#f43f5e;--yellow:#eab308;--blue:#60a5fa;
+  --text:#f0f0f8;--text-muted:#8888aa;--text-dim:#444466;
+  --border:rgba(255,255,255,0.07);--border-purple:rgba(124,90,243,0.35);
+  --r:18px;--rs:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;padding-bottom:100px}
+body::before{content:'';position:fixed;top:-150px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(124,90,243,0.1) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 14px;position:sticky;top:0;z-index:100;background:linear-gradient(180deg,var(--bg) 85%,transparent)}
+.header-left h1{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;letter-spacing:-.5px}
+.header-left p{font-size:12px;color:var(--text-muted);margin-top:2px}
+.xp-badge{background:rgba(124,90,243,0.15);border:1px solid var(--border-purple);border-radius:20px;padding:8px 16px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.xp-badge .xp-icon{font-size:18px}
+.xp-badge .xp-val{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--purple-light)}
+.xp-badge .xp-label{font-size:10px;color:var(--text-muted);line-height:1.1}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(13,13,20,0.97);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:500;padding:8px 6px 22px;gap:4px}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:var(--rs);cursor:pointer;transition:all .2s;color:var(--text-muted);font-size:10px;font-weight:600;border:none;background:none;font-family:'DM Sans',sans-serif;letter-spacing:.2px}
+.nav-item.active{background:var(--purple-dim);color:var(--purple-light)}
+.nav-icon{font-size:22px}
+
+/* PAGE */
+.page{display:none;animation:fadeUp .3s ease}
+.page.active{display:block}
+.section{padding:0 18px 26px}
+.section-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:14px;letter-spacing:-.3px}
+.section-sub{font-size:12px;color:var(--text-muted);font-weight:500;margin-left:8px;font-family:'DM Sans',sans-serif}
+
+/* DATE STRIP */
+.date-strip{display:flex;gap:8px;padding:6px 18px 18px;overflow-x:auto;scrollbar-width:none}
+.date-strip::-webkit-scrollbar{display:none}
+.date-item{min-width:58px;height:64px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;gap:2px}
+.date-item.active{background:var(--purple);border-color:var(--purple);box-shadow:0 0 16px var(--purple-glow)}
+.date-day{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.date-item.active .date-day{color:rgba(255,255,255,.75)}
+.date-num{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
+
+/* COUNTERS */
+.counters-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px 22px}
+.counter-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px;transition:border .2s}
+.counter-card:hover{border-color:var(--border-purple)}
+.counter-header{display:flex;align-items:center;justify-content:space-between}
+.counter-icon{font-size:22px}
+.counter-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.counter-val{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1}
+.counter-target{font-size:11px;color:var(--text-muted)}
+.counter-bar{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.counter-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.counter-btns{display:flex;gap:6px}
+.c-btn{flex:1;height:36px;border:1px solid var(--border);background:var(--card2);border-radius:10px;color:var(--text);font-size:18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;font-weight:700}
+.c-btn.plus{border-color:var(--border-purple);background:var(--purple-dim);color:var(--purple-light)}
+.c-btn.plus:hover{background:var(--purple);color:white}
+.c-btn.minus:hover{background:var(--card2)}
+.counter-tip{font-size:11px;color:var(--text-muted);line-height:1.4;padding-top:2px}
+
+/* SLEEP specific */
+.sleep-time{display:flex;gap:6px;align-items:center;justify-content:center}
+.sleep-time input{background:var(--card2);border:1px solid var(--border-purple);border-radius:8px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:8px 10px;text-align:center;outline:none;width:70px}
+.sleep-time span{color:var(--text-muted);font-size:13px}
+
+/* PROTOCOL CARDS */
+.protocol-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px;transition:border .2s}
+.protocol-card.done-card{border-color:rgba(34,211,160,.25)}
+.proto-header{padding:18px 18px 12px;display:flex;align-items:center;gap:14px;cursor:pointer}
+.proto-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--border)}
+.proto-meta{flex:1}
+.proto-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;line-height:1.2}
+.proto-obj{font-size:12px;color:var(--text-muted);margin-top:3px}
+.proto-progress-wrap{display:flex;align-items:center;gap:8px;margin-top:6px}
+.proto-progress-bar{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.proto-progress-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.proto-progress-txt{font-size:11px;color:var(--text-muted);font-weight:600;flex-shrink:0}
+.proto-chevron{font-size:16px;color:var(--text-dim);transition:transform .3s;flex-shrink:0}
+.proto-chevron.open{transform:rotate(180deg)}
+.proto-body{display:none;padding:0 18px 18px}
+.proto-body.open{display:block;animation:fadeUp .25s ease}
+.task-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.task-item:last-child{border-bottom:none}
+.task-check{width:26px;height:26px;border-radius:8px;border:2px solid var(--border-purple);background:transparent;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.task-check.checked{background:var(--purple);border-color:var(--purple);box-shadow:0 0 8px var(--purple-glow)}
+.task-check.checked::after{content:'✓';color:white;font-size:13px;font-weight:700}
+.task-text{flex:1}
+.task-name{font-size:14px;font-weight:500;transition:color .2s;line-height:1.3}
+.task-name.checked{color:var(--text-muted);text-decoration:line-through}
+.task-sub{font-size:12px;color:var(--text-dim);margin-top:3px;line-height:1.4}
+.task-xp{font-size:11px;font-weight:700;color:var(--purple-light);flex-shrink:0;margin-top:3px}
+.result-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.result-tag{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(34,211,160,0.12);border:1px solid rgba(34,211,160,0.25);color:var(--green)}
+
+/* SPORT PAGE */
+.sport-calendar{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 6px;margin-bottom:16px}
+.sport-calendar::-webkit-scrollbar{display:none}
+.sport-day-slot{min-width:56px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 6px;cursor:pointer;transition:all .2s;position:relative}
+.sport-day-slot.has-session{border-color:var(--border-purple)}
+.sport-day-slot.today{border-color:var(--purple)}
+.sport-day-slot .sd-day{font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase}
+.sport-day-slot .sd-num{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+.sport-day-slot .sd-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);position:absolute;bottom:6px}
+.session-form{background:var(--card);border:1px solid var(--border-purple);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.form-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+.form-input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:12px 14px;outline:none;transition:border .2s}
+.form-input:focus{border-color:var(--purple)}
+.form-input::placeholder{color:var(--text-dim)}
+textarea.form-input{resize:none;line-height:1.5}
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.type-btn{padding:10px 6px;border-radius:var(--rs);border:1px solid var(--border);background:var(--card2);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;font-family:'DM Sans',sans-serif}
+.type-btn.active{border-color:var(--purple);background:var(--purple-dim);color:var(--purple-light)}
+.intensity-row{display:flex;gap:8px}
+.intensity-btn{flex:1;padding:10px;border-radius:var(--rs);border:1px solid var(--border);background:var(--card2);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;text-align:center}
+.intensity-btn.active{border-color:var(--orange);background:rgba(249,115,22,.12);color:var(--orange)}
+.save-btn{width:100%;padding:15px;background:var(--purple);border:none;border-radius:var(--rs);color:white;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px var(--purple-glow);margin-top:4px}
+.save-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--purple-glow)}
+.session-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;animation:fadeUp .3s ease;cursor:pointer;transition:all .2s}
+.session-card:hover{border-color:var(--border-purple)}
+.session-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.session-card-icon{font-size:24px}
+.session-card-meta{flex:1}
+.session-card-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.session-card-info{font-size:12px;color:var(--text-muted);margin-top:2px}
+.session-card-tags{display:flex;gap:6px;flex-wrap:wrap}
+.s-tag{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.session-card-note{font-size:13px;color:var(--text-muted);line-height:1.5;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.session-done-badge{background:rgba(34,211,160,.12);border:1px solid rgba(34,211,160,.3);color:var(--green);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700}
+
+/* XP / PROFIL */
+.xp-overview{background:var(--card);border:1px solid var(--border-purple);border-radius:var(--r);padding:22px;margin-bottom:16px;text-align:center;animation:fadeUp .4s ease}
+.xp-level{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.xp-big{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;color:var(--purple-light);line-height:1}
+.xp-bar-wrap{margin:14px 0}
+.xp-bar{height:10px;background:rgba(255,255,255,.07);border-radius:5px;overflow:hidden}
+.xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--purple-light));border-radius:5px;transition:width .8s ease}
+.xp-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:5px}
+.title-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(124,90,243,0.15);border:1px solid var(--border-purple);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--purple-light);margin-top:10px}
+.reward-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.reward-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:14px;display:flex;flex-direction:column;gap:6px;transition:all .2s}
+.reward-card.unlocked{border-color:rgba(34,211,160,.3);background:rgba(34,211,160,.04)}
+.reward-card.locked{opacity:.5;filter:grayscale(.5)}
+.reward-icon{font-size:26px}
+.reward-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.reward-req{font-size:11px;color:var(--text-muted)}
+.reward-status{font-size:11px;font-weight:700}
+
+/* TOAST */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--purple);color:white;padding:11px 20px;border-radius:20px;font-size:14px;font-weight:600;z-index:2000;opacity:0;transition:all .3s;white-space:nowrap;box-shadow:0 8px 24px var(--purple-glow)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* XP POPUP */
+.xp-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);background:var(--card);border:2px solid var(--purple);border-radius:24px;padding:30px 40px;text-align:center;z-index:3000;opacity:0;pointer-events:none;transition:all .3s;box-shadow:0 0 60px var(--purple-glow)}
+.xp-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all}
+.xp-popup-dim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2999;opacity:0;pointer-events:none;transition:opacity .3s}
+.xp-popup-dim.show{opacity:1;pointer-events:all}
+.xp-popup-icon{font-size:48px;margin-bottom:10px}
+.xp-popup-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px}
+.xp-popup-sub{font-size:14px;color:var(--text-muted)}
+.xp-popup-val{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;color:var(--purple-light);margin:10px 0}
+.xp-popup-close{margin-top:16px;padding:12px 30px;background:var(--purple);border:none;border-radius:20px;color:white;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+
+/* UTILS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.divider{height:1px;background:var(--border);margin:0 18px 22px}
+</style>
+</head>
+<body>
+
+<!-- XP Popup -->
+<div class="xp-popup-dim" id="xpDim" onclick="closeXpPopup()"></div>
+<div class="xp-popup" id="xpPopup">
+  <div class="xp-popup-icon" id="xpPopupIcon">⭐</div>
+  <div class="xp-popup-title" id="xpPopupTitle">Tâche complétée !</div>
+  <div class="xp-popup-sub" id="xpPopupSub">Tu as gagné</div>
+  <div class="xp-popup-val" id="xpPopupVal">+10 XP</div>
+  <button class="xp-popup-close" onclick="closeXpPopup()">Continue 💪</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Protocoles</h1>
+    <p id="headerDate"></p>
+  </div>
+  <div class="xp-badge" onclick="showPage('profil')">
+    <span class="xp-icon">⚡</span>
+    <div>
+      <div class="xp-val" id="xpDisplay">0</div>
+      <div class="xp-label">XP total</div>
+    </div>
+  </div>
+</div>
+
+<div class="date-strip" id="dateStrip"></div>
+
+<!-- ===== ACCUEIL ===== -->
+<div class="page active" id="page-accueil">
+  <!-- Counters -->
+  <div class="counters-grid">
+    <!-- EAU -->
+    <div class="counter-card">
+      <div class="counter-header">
+        <span class="counter-icon">💧</span>
+        <div>
+          <div class="counter-title">Eau</div>
+          <div class="counter-target">Objectif: <span id="waterTarget">2.5</span>L</div>
+        </div>
+      </div>
+      <div>
+        <div class="counter-val" id="waterVal">0.0</div>
+        <div style="font-size:11px;color:var(--text-muted)">litres aujourd'hui</div>
+      </div>
+      <div class="counter-bar"><div class="counter-fill" id="waterBar" style="background:linear-gradient(90deg,var(--blue),var(--green));width:0%"></div></div>
+      <div class="counter-btns">
+        <button class="c-btn minus" onclick="changeWater(-0.25)">−</button>
+        <button class="c-btn plus" onclick="changeWater(0.25)">+250ml</button>
+      </div>
+      <div class="counter-tip" id="waterTip">💡 Boire 500ml dès le réveil accélère le drainage lymphatique.</div>
+    </div>
+    <!-- SOMMEIL -->
+    <div class="counter-card">
+      <div class="counter-header">
+        <span class="counter-icon">🌙</span>
+        <div>
+          <div class="counter-title">Sommeil</div>
+          <div class="counter-target">Objectif: 8h</div>
+        </div>
+      </div>
+      <div>
+        <div class="counter-val" id="sleepVal">0h</div>
+        <div style="font-size:11px;color:var(--text-muted)">cette nuit</div>
+      </div>
+      <div class="counter-bar"><div class="counter-fill" id="sleepBar" style="background:linear-gradient(90deg,var(--purple),var(--purple-light));width:0%"></div></div>
+      <div class="sleep-time">
+        <input type="time" id="sleepStart" value="23:00" onchange="calcSleep()">
+        <span>→</span>
+        <input type="time" id="sleepEnd" value="07:00" onchange="calcSleep()">
+      </div>
+      <div class="counter-tip" id="sleepTip">💡 Dors dans le noir total à 18–19°C pour un sommeil profond.</div>
+    </div>
+  </div>
+
+  <!-- Protocols -->
+  <div class="section">
+    <div class="section-title">Mes protocoles <span class="section-sub">Coche tes tâches</span></div>
+    <div id="protocolList"></div>
+  </div>
+</div>
+
+<!-- ===== SPORT ===== -->
+<div class="page" id="page-sport">
+  <div class="section">
+    <div class="section-title">Séances sport</div>
+    <!-- Calendar -->
+    <div class="sport-calendar" id="sportCalendar"></div>
+    <!-- Form -->
+    <div class="session-form">
+      <div class="form-title">🏋️ Programmer une séance</div>
+      <div class="form-group">
+        <label class="form-label">Type d'entraînement</label>
+        <div class="type-grid">
+          <button class="type-btn active" data-type="Muscu" onclick="selectType(this)">💪 Muscu</button>
+          <button class="type-btn" data-type="Sprint" onclick="selectType(this)">⚡ Sprint</button>
+          <button class="type-btn" data-type="Cardio" onclick="selectType(this)">🏃 Cardio</button>
+          <button class="type-btn" data-type="Boxe" onclick="selectType(this)">🥊 Boxe</button>
+          <button class="type-btn" data-type="HIIT" onclick="selectType(this)">🔥 HIIT</button>
+          <button class="type-btn" data-type="Yoga" onclick="selectType(this)">🧘 Yoga</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date & heure</label>
+        <input type="datetime-local" class="form-input" id="sessionDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Durée estimée</label>
+        <input type="text" class="form-input" id="sessionDuration" placeholder="ex: 45 min, 1h30...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Intensité</label>
+        <div class="intensity-row">
+          <button class="intensity-btn" onclick="selectIntensity(this,'Légère')">😌 Légère</button>
+          <button class="intensity-btn active" onclick="selectIntensity(this,'Modérée')">💪 Modérée</button>
+          <button class="intensity-btn" onclick="selectIntensity(this,'Intense')">🔥 Intense</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Exercices / Notes pré-séance</label>
+        <textarea class="form-input" id="sessionPlan" rows="3" placeholder="Ex: Bench press 4×8, squat 4×10, développé militaire..."></textarea>
+      </div>
+      <button class="save-btn" onclick="saveSession()">📅 Enregistrer la séance</button>
+    </div>
+
+    <!-- Sessions list -->
+    <div class="section-title" style="margin-top:4px">Historique & à venir</div>
+    <div id="sessionsList"></div>
+  </div>
+</div>
+
+<!-- ===== PROFIL / XP ===== -->
+<div class="page" id="page-profil">
+  <div class="section">
+    <div class="section-title">Mon profil</div>
+    <div class="xp-overview">
+      <div class="xp-level" id="levelLabel">NIVEAU 1</div>
+      <div class="xp-big" id="totalXpDisplay">0</div>
+      <div style="font-size:13px;color:var(--text-muted)">XP accumulés</div>
+      <div class="xp-bar-wrap">
+        <div class="xp-bar"><div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div></div>
+        <div class="xp-bar-label"><span id="xpBarCurrent">0 XP</span><span id="xpBarNext">100 XP pour le niveau 2</span></div>
+      </div>
+      <div class="title-badge" id="playerTitle">🌱 Débutant</div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:14px;text-align:center">
+        <div style="font-size:24px;margin-bottom:4px">💧</div>
+        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--blue)" id="statWaterTotal">0L</div>
+        <div style="font-size:11px;color:var(--text-muted)">Eau totale</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:14px;text-align:center">
+        <div style="font-size:24px;margin-bottom:4px">🏋️</div>
+        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--orange)" id="statSessions">0</div>
+        <div style="font-size:11px;color:var(--text-muted)">Séances</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:14px;text-align:center">
+        <div style="font-size:24px;margin-bottom:4px">✅</div>
+        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--green)" id="statTasks">0</div>
+        <div style="font-size:11px;color:var(--text-muted)">Tâches</div>
+      </div>
+    </div>
+
+    <div class="section-title">Récompenses</div>
+    <div class="reward-grid" id="rewardGrid"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-item active" id="nav-accueil" onclick="showPage('accueil')"><span class="nav-icon">🏠</span>Accueil</button>
+  <button class="nav-item" id="nav-sport" onclick="showPage('sport')"><span class="nav-icon">🏋️</span>Sport</button>
+  <button class="nav-item" id="nav-profil" onclick="showPage('profil')"><span class="nav-icon">⚡</span>XP & Titres</button>
+</nav>
+
+<script>
+// ===== STATE =====
+let state = JSON.parse(localStorage.getItem('dpState') || 'null') || {
+  xp: 0,
+  water: 0,
+  sleep: 0,
+  sleepStart: '23:00',
+  sleepEnd: '07:00',
+  tasks: {},
+  sessions: [],
+  waterTotal: 0,
+  totalTasksDone: 0,
+};
+function save(){ localStorage.setItem('dpState', JSON.stringify(state)); }
+
+// ===== DATE =====
+const DAY_NAMES = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const DAY_SHORT = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+const MONTH_NAMES = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const today = new Date();
+document.getElementById('headerDate').textContent = DAY_NAMES[today.getDay()] + ' ' + today.getDate() + ' ' + MONTH_NAMES[today.getMonth()];
+
+// Date strip
+const strip = document.getElementById('dateStrip');
+for(let i=-3;i<=3;i++){
+  const d = new Date(today); d.setDate(today.getDate()+i);
+  const el = document.createElement('div'); el.className = 'date-item'+(i===0?' active':'');
+  el.innerHTML = `<span class="date-day">${DAY_SHORT[d.getDay()]}</span><span class="date-num">${d.getDate()}</span>`;
+  el.onclick = () => { document.querySelectorAll('.date-item').forEach(x=>x.classList.remove('active')); el.classList.add('active'); };
+  strip.appendChild(el);
+}
+
+// Default session date/time
+const now = new Date();
+const pad = n => String(n).padStart(2,'0');
+document.getElementById('sessionDate').value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+// ===== PAGES =====
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='profil') updateProfile();
+}
+
+// ===== TOAST =====
+function showToast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400); }
+
+// ===== XP POPUP =====
+function showXpPopup(icon,title,sub,xpVal){
+  document.getElementById('xpPopupIcon').textContent = icon;
+  document.getElementById('xpPopupTitle').textContent = title;
+  document.getElementById('xpPopupSub').textContent = sub;
+  document.getElementById('xpPopupVal').textContent = '+'+xpVal+' XP';
+  document.getElementById('xpPopup').classList.add('show');
+  document.getElementById('xpDim').classList.add('show');
+}
+function closeXpPopup(){
+  document.getElementById('xpPopup').classList.remove('show');
+  document.getElementById('xpDim').classList.remove('show');
+}
+
+// ===== XP SYSTEM =====
+const LEVELS = [0,100,250,500,900,1500,2500,4000,6000,10000];
+const TITLES = ['🌱 Débutant','⚡ Actif','💪 Athlète','🔥 Guerrier','🏆 Champion','💎 Élite','🚀 Légende','👑 Maître','🌟 Dieu du Debloat','🪐 Intouchable'];
+
+function addXP(amount, icon='⭐', label='Tâche complétée !'){
+  const prev = state.xp;
+  state.xp += amount;
+  document.getElementById('xpDisplay').textContent = state.xp;
+  save();
+  showXpPopup(icon, label, 'Tu as gagné', amount);
+}
+
+function getLevel(xp){
+  let lvl=0;
+  for(let i=0;i<LEVELS.length;i++) if(xp>=LEVELS[i]) lvl=i;
+  return lvl;
+}
+
+function updateProfile(){
+  const xp = state.xp;
+  const lvl = getLevel(xp);
+  const nextXp = LEVELS[lvl+1] || LEVELS[lvl]*2;
+  const currXp = LEVELS[lvl];
+  const pct = Math.min(100, ((xp-currXp)/(nextXp-currXp))*100);
+  document.getElementById('levelLabel').textContent = 'NIVEAU '+(lvl+1);
+  document.getElementById('totalXpDisplay').textContent = xp;
+  document.getElementById('xpBarFill').style.width = pct+'%';
+  document.getElementById('xpBarCurrent').textContent = xp+' XP';
+  document.getElementById('xpBarNext').textContent = nextXp+' XP pour niveau '+(lvl+2);
+  document.getElementById('playerTitle').textContent = TITLES[lvl]||TITLES[TITLES.length-1];
+  document.getElementById('statWaterTotal').textContent = (state.waterTotal||0).toFixed(1)+'L';
+  document.getElementById('statSessions').textContent = state.sessions.length;
+  document.getElementById('statTasks').textContent = state.totalTasksDone||0;
+  renderRewards(xp);
+}
+
+const REWARDS = [
+  {icon:'🌱',name:'Premier pas',req:'1ère tâche cochée',xp:0,check:()=>(state.totalTasksDone||0)>=1},
+  {icon:'💧',name:'Hydraté',req:'5L d\'eau buvus',xp:50,check:()=>(state.waterTotal||0)>=5},
+  {icon:'🔥',name:'3 jours de feu',req:'3 séances validées',xp:100,check:()=>state.sessions.filter(s=>s.done).length>=3},
+  {icon:'💪',name:'Protocole Pro',req:'Un protocole 100%',xp:150,check:()=>checkAnyProtocol100()},
+  {icon:'🏆',name:'100 XP',req:'Atteindre 100 XP',xp:100,check:()=>state.xp>=100},
+  {icon:'⚡',name:'Niveau 2',req:'Atteindre niveau 2',xp:250,check:()=>state.xp>=250},
+  {icon:'🌙',name:'Bon dormeur',req:'Enregistrer son sommeil',xp:30,check:()=>state.sleep>0},
+  {icon:'👑',name:'Champion',req:'500 XP',xp:500,check:()=>state.xp>=500},
+];
+
+function checkAnyProtocol100(){
+  return protocols.some(p=>{ const done=p.tasks.filter(t=>state.tasks[t.id]).length; return done===p.tasks.length && p.tasks.length>0; });
+}
+
+function renderRewards(xp){
+  const grid = document.getElementById('rewardGrid'); grid.innerHTML='';
+  REWARDS.forEach(r=>{
+    const unlocked = r.check();
+    const el = document.createElement('div'); el.className = 'reward-card '+(unlocked?'unlocked':'locked');
+    el.innerHTML = `<div class="reward-icon">${r.icon}</div><div class="reward-name">${r.name}</div><div class="reward-req">${r.req}</div><div class="reward-status" style="color:${unlocked?'var(--green)':'var(--text-dim)'}">${unlocked?'✅ Débloqué':'🔒 Verrouillé'}</div>`;
+    grid.appendChild(el);
+  });
+}
+
+// ===== PROTOCOLS =====
+const protocols = [
+  {
+    id:'debloat', icon:'🧊', color:'#60a5fa', name:'Facial De-Bloat Express',
+    obj:'Dégonfler le visage et rendre les traits plus nets',
+    tasks:[
+      {id:'d1',name:'1L d\'eau minérale le matin',sub:'À faire dès le réveil, avant tout',xp:15},
+      {id:'d2',name:'Réduire le sel ajouté',sub:'Éviter plats salés, fromages forts, charcuterie',xp:10},
+      {id:'d3',name:'Massage lymphatique 5–8 min',sub:'Cou → mâchoire → descendre vers les clavicules',xp:20},
+      {id:'d4',name:'Fruit riche en potassium',sub:'Banane, kiwi ou orange',xp:10},
+      {id:'d5',name:'Low carb au repas du soir',sub:'Réduire riz, pâtes, pain le soir',xp:10},
+    ],
+    results:['Visage moins gonflé','Mâchoire plus visible','Traits plus définis'],
+  },
+  {
+    id:'sleep', icon:'🌙', color:'#a78bfa', name:'Sleep Reset Protocol',
+    obj:'Améliorer la qualité du sommeil pour une meilleure récup',
+    tasks:[
+      {id:'s1',name:'Couper les écrans 1–2h avant',sub:'Ou porter des lunettes anti-lumière bleue',xp:15},
+      {id:'s2',name:'Chambre sombre et fraîche',sub:'Température idéale : 18–19°C',xp:10},
+      {id:'s3',name:'Dernier repas 3h avant le coucher',sub:'Finir de manger avant 20h si tu dors à 23h',xp:15},
+      {id:'s4',name:'Respiration lente au lit',sub:'6 respirations/min pendant 5 minutes',xp:20},
+    ],
+    results:['Sommeil plus profond','Meilleure énergie','Peau plus propre','Hormones régulées'],
+  },
+  {
+    id:'testo', icon:'⚡', color:'#f97316', name:'Testo Booster Stack',
+    obj:'Soutenir la testostérone naturellement au quotidien',
+    tasks:[
+      {id:'t1',name:'20 min de soleil le matin',sub:'Visage et bras exposés, avant 10h si possible',xp:15},
+      {id:'t2',name:'Sport explosif réalisé',sub:'Sprint, charges lourdes — 2 à 3 fois/semaine',xp:25},
+      {id:'t3',name:'30g de noix du Brésil',sub:'Source de sélénium, puissant pour la testostérone',xp:10},
+      {id:'t4',name:'Œufs au menu',sub:'Minimum 2 œufs entiers dans la journée',xp:10},
+      {id:'t5',name:'Dormi 7–8h cette nuit',sub:'Le sommeil est le levier n°1 de la testostérone',xp:20},
+    ],
+    results:["Plus d'énergie",'Libido plus forte','Meilleure forme physique'],
+  },
+  {
+    id:'skin', icon:'✨', color:'#22d3a0', name:'Skin Glow Routine',
+    obj:'Avoir une peau plus propre et lumineuse',
+    tasks:[
+      {id:'k1',name:'Nettoyage visage matin',sub:'Produit doux, pas de savon agressif',xp:10},
+      {id:'k2',name:'Nettoyage visage soir',sub:'Enlever toutes les impuretés de la journée',xp:10},
+      {id:'k3',name:'Crème hydratante appliquée',sub:'Non comédogène, après la douche',xp:10},
+      {id:'k4',name:'2–3L d\'eau buvus',sub:'Hydratation = base d\'une belle peau',xp:15},
+      {id:'k5',name:'Minéraux apportés',sub:'Magnésium + potassium dans l\'alimentation',xp:10},
+      {id:'k6',name:'Carottes mangées',sub:'Source de caroténoïdes → teint lumineux',xp:10},
+    ],
+    results:["Moins d'acné",'Peau plus lisse','Teint plus lumineux'],
+  },
+];
+
+function renderProtocols(){
+  const list = document.getElementById('protocolList'); list.innerHTML='';
+  protocols.forEach(p=>{
+    const doneCount = p.tasks.filter(t=>state.tasks[t.id]).length;
+    const total = p.tasks.length;
+    const pct = total>0 ? Math.round((doneCount/total)*100) : 0;
+    const isDone = doneCount===total;
+
+    const card = document.createElement('div'); card.className = 'protocol-card'+(isDone?' done-card':'');
+    card.innerHTML = `
+      <div class="proto-header" onclick="toggleProto('body-${p.id}','chev-${p.id}')">
+        <div class="proto-icon" style="background:${p.color}22;border-color:${p.color}44">${p.icon}</div>
+        <div class="proto-meta">
+          <div class="proto-name">${p.name}</div>
+          <div class="proto-obj">${p.obj}</div>
+          <div class="proto-progress-wrap">
+            <div class="proto-progress-bar"><div class="proto-progress-fill" style="width:${pct}%;background:${p.color}"></div></div>
+            <div class="proto-progress-txt">${doneCount}/${total}</div>
+          </div>
+        </div>
+        <div class="proto-chevron" id="chev-${p.id}">▾</div>
+      </div>
+      <div class="proto-body" id="body-${p.id}">
+        ${p.tasks.map(t=>{
+          const checked = !!state.tasks[t.id];
+          return `<div class="task-item">
+            <div class="task-check ${checked?'checked':''}" id="chk-${t.id}" onclick="toggleTask('${t.id}','${p.id}',${t.xp})"></div>
+            <div class="task-text">
+              <div class="task-name ${checked?'checked':''}" id="taskname-${t.id}">${t.name}</div>
+              ${t.sub?`<div class="task-sub">${t.sub}</div>`:''}
+            </div>
+            <div class="task-xp">+${t.xp} XP</div>
+          </div>`;
+        }).join('')}
+        <div class="result-tags">${p.results.map(r=>`<span class="result-tag">✓ ${r}</span>`).join('')}</div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function toggleProto(bodyId, chevId){
+  const body = document.getElementById(bodyId);
+  const chev = document.getElementById(chevId);
+  const open = body.classList.toggle('open');
+  chev.classList.toggle('open', open);
+}
+
+function toggleTask(taskId, protoId, xpVal){
+  const wasChecked = !!state.tasks[taskId];
+  if(!wasChecked){
+    state.tasks[taskId] = true;
+    state.totalTasksDone = (state.totalTasksDone||0) + 1;
+    const proto = protocols.find(p=>p.id===protoId);
+    addXP(xpVal, proto?proto.icon:'⭐', 'Tâche complétée !');
+  } else {
+    state.tasks[taskId] = false;
+    state.xp = Math.max(0, state.xp - xpVal);
+    document.getElementById('xpDisplay').textContent = state.xp;
+  }
+  save();
+  // update UI without full re-render
+  const chk = document.getElementById('chk-'+taskId);
+  const nm = document.getElementById('taskname-'+taskId);
+  if(chk){ chk.classList.toggle('checked', !!state.tasks[taskId]); }
+  if(nm){ nm.classList.toggle('checked', !!state.tasks[taskId]); }
+  // update progress bar
+  renderProtocols();
+}
+
+// ===== WATER =====
+function changeWater(delta){
+  state.water = Math.max(0, Math.round((state.water + delta)*100)/100);
+  state.waterTotal = Math.round(((state.waterTotal||0) + (delta>0?delta:0))*100)/100;
+  save();
+  updateWaterUI();
+}
+
+function updateWaterUI(){
+  const target = parseFloat(document.getElementById('waterTarget').textContent)||2.5;
+  const pct = Math.min(100, (state.water/target)*100);
+  document.getElementById('waterVal').textContent = state.water.toFixed(1);
+  document.getElementById('waterBar').style.width = pct+'%';
+  const tips = [
+    '💡 Boire 500ml dès le réveil accélère le drainage lymphatique.',
+    '💡 Un verre avant chaque repas aide à moins gonfler.',
+    '💡 L\'eau minérale (Hépar, Contrex) est riche en magnésium.',
+    '💡 50% de ton objectif eau atteint, continue !',
+    '💡 Boire régulièrement évite la rétention d\'eau paradoxale.',
+    '🎉 Objectif eau atteint ! Ton visage va dégonfler cette nuit.',
+  ];
+  const idx = Math.min(Math.floor(state.water/0.5), tips.length-1);
+  document.getElementById('waterTip').textContent = tips[idx];
+  if(state.water>=target && !state._waterXpGiven){ state._waterXpGiven=true; addXP(20,'💧','Objectif eau atteint !'); save(); }
+}
+
+// ===== SLEEP =====
+function calcSleep(){
+  const s = document.getElementById('sleepStart').value;
+  const e = document.getElementById('sleepEnd').value;
+  if(!s||!e) return;
+  state.sleepStart=s; state.sleepEnd=e;
+  const [sh,sm] = s.split(':').map(Number);
+  const [eh,em] = e.split(':').map(Number);
+  let diff = (eh*60+em) - (sh*60+sm);
+  if(diff<0) diff+=24*60;
+  const hours = diff/60;
+  state.sleep = hours;
+  save();
+  updateSleepUI(hours);
+}
+
+function updateSleepUI(hours){
+  const pct = Math.min(100,(hours/8)*100);
+  document.getElementById('sleepVal').textContent = hours.toFixed(1)+'h';
+  document.getElementById('sleepBar').style.width = pct+'%';
+  const tips = hours<6
+    ? '⚠️ Moins de 6h : testostérone réduite de 15%, puffiness augmenté.'
+    : hours<7 ? '💡 Vise 7–8h pour une récupération optimale et une peau nette.'
+    : hours<8 ? '✅ Bon sommeil ! Ton visage va désengorger cette nuit.'
+    : '🏆 Sommeil parfait ! Hormones et peau au top.';
+  document.getElementById('sleepTip').textContent = tips;
+}
+
+// Restore sleep inputs
+if(state.sleepStart) document.getElementById('sleepStart').value = state.sleepStart;
+if(state.sleepEnd) document.getElementById('sleepEnd').value = state.sleepEnd;
+if(state.sleep>0) updateSleepUI(state.sleep);
+
+// ===== SPORT =====
+let selectedType = 'Muscu';
+let selectedIntensity = 'Modérée';
+
+function selectType(btn){
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); selectedType = btn.dataset.type;
+}
+function selectIntensity(btn, val){
+  document.querySelectorAll('.intensity-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); selectedIntensity = val;
+}
+
+const typeIcons = {Muscu:'💪',Sprint:'⚡',Cardio:'🏃',Boxe:'🥊',HIIT:'🔥',Yoga:'🧘'};
+const typeColors = {Muscu:'var(--orange)',Sprint:'var(--yellow)',Cardio:'var(--green)',Boxe:'var(--red)',HIIT:'var(--orange)',Yoga:'var(--purple-light)'};
+
+function saveSession(){
+  const date = document.getElementById('sessionDate').value;
+  const duration = document.getElementById('sessionDuration').value.trim();
+  const plan = document.getElementById('sessionPlan').value.trim();
+  if(!date){ showToast('⚠️ Choisis une date'); return; }
+
+  const session = {
+    id: Date.now(),
+    type: selectedType,
+    intensity: selectedIntensity,
+    date: date,
+    duration: duration || '?',
+    plan: plan,
+    done: false,
+    note: '',
+  };
+  state.sessions.unshift(session);
+  save();
+  renderSessions();
+  renderSportCalendar();
+  showToast('📅 Séance programmée !');
+  document.getElementById('sessionPlan').value = '';
+  document.getElementById('sessionDuration').value = '';
+}
+
+function validateSession(id){
+  const s = state.sessions.find(x=>x.id===id);
+  if(!s||s.done) return;
+  const note = prompt('💬 Note sur ta séance (facultatif) :') || '';
+  s.done = true; s.note = note;
+  save();
+  renderSessions();
+  addXP(30, typeIcons[s.type]||'🏋️', s.type+' validé !');
+}
+
+function deleteSession(id){
+  state.sessions = state.sessions.filter(x=>x.id!==id);
+  save(); renderSessions(); renderSportCalendar();
+  showToast('🗑️ Séance supprimée');
+}
+
+function renderSessions(){
+  const list = document.getElementById('sessionsList'); list.innerHTML='';
+  if(state.sessions.length===0){
+    list.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:30px;font-size:14px">Aucune séance programmée.<br>Planifie ta première séance 💪</div>';
+    return;
+  }
+  state.sessions.forEach(s=>{
+    const d = new Date(s.date);
+    const dateStr = DAY_SHORT[d.getDay()]+' '+d.getDate()+' '+MONTH_NAMES[d.getMonth()]+' · '+pad(d.getHours())+'h'+pad(d.getMinutes());
+    const el = document.createElement('div'); el.className='session-card';
+    el.innerHTML=`
+      <div class="session-card-header">
+        <div class="session-card-icon">${typeIcons[s.type]||'🏋️'}</div>
+        <div class="session-card-meta">
+          <div class="session-card-name">${s.type}</div>
+          <div class="session-card-info">${dateStr} · ${s.duration}</div>
+        </div>
+        ${s.done?'<div class="session-done-badge">✓ Validée</div>':''}
+      </div>
+      <div class="session-card-tags">
+        <span class="s-tag" style="background:rgba(124,90,243,.12);border:1px solid var(--border-purple);color:var(--purple-light)">${s.intensity}</span>
+        ${s.done?`<span class="s-tag" style="background:rgba(34,211,160,.1);border:1px solid rgba(34,211,160,.25);color:var(--green)">+30 XP</span>`:''}
+      </div>
+      ${s.plan?`<div class="session-card-note">📝 ${s.plan}</div>`:''}
+      ${s.note?`<div class="session-card-note" style="color:var(--purple-light)">💬 ${s.note}</div>`:''}
+      <div style="display:flex;gap:8px;margin-top:12px">
+        ${!s.done?`<button onclick="validateSession(${s.id})" style="flex:1;padding:10px;background:var(--purple);border:none;border-radius:10px;color:white;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer">✓ Valider la séance</button>`:''}
+        <button onclick="deleteSession(${s.id})" style="width:36px;height:36px;${!s.done?'':'flex:1;padding:10px;'}background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--text-muted);cursor:pointer;font-size:${!s.done?'16px':'13px'};font-family:'Syne',sans-serif;font-weight:600">${!s.done?'🗑️':'Supprimer'}</button>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+function renderSportCalendar(){
+  const cal = document.getElementById('sportCalendar'); cal.innerHTML='';
+  for(let i=-3;i<=10;i++){
+    const d = new Date(today); d.setDate(today.getDate()+i);
+    const dStr = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const hasSess = state.sessions.some(s=>s.date.startsWith(dStr));
+    const isToday = i===0;
+    const el = document.createElement('div'); el.className='sport-day-slot'+(isToday?' today':'')+(hasSess?' has-session':'');
+    el.innerHTML=`<div class="sd-day">${DAY_SHORT[d.getDay()]}</div><div class="sd-num">${d.getDate()}</div>${hasSess?'<div class="sd-dot"></div>':''}`;
+    cal.appendChild(el);
+  }
+}
+
+// ===== INIT =====
+renderProtocols();
+updateWaterUI();
+renderSessions();
+renderSportCalendar();
+document.getElementById('xpDisplay').textContent = state.xp;
+calcSleep();
+</script>
+</body>
+</html>
